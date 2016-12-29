@@ -82,6 +82,15 @@ public class PhpVerticleFactory implements VerticleFactory {
             if (scriptFile.exists()) {
                 return scriptFile.toPath().toString();
             }
+            else {
+                return script;
+            }
+        }
+        else {
+            File scriptFile = new File(script);
+            if (scriptFile.exists()) {
+                return scriptFile.toPath().toString();
+            }
         }
         return null;
     }
