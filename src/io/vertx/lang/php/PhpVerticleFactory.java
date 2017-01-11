@@ -190,7 +190,6 @@ public class PhpVerticleFactory implements VerticleFactory {
         private WriteStream out;
 
         private Env globalEnv;
-        private Vertx vertx;
 
         PhpVerticle(QuercusContext querContext, String script) {
             this.scriptName = script;

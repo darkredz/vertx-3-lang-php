@@ -42,6 +42,7 @@ public class HandlerFactory {
     return new Handler<T>(env, PhpTypes.toCallable(handler));
   }
 
+
   /**
    * Creates a void result handler.
    */
