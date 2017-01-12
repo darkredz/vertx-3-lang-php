@@ -1,7 +1,5 @@
 package io.vertx.lang.php;
 
-import io.vertx.core.Handler;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.lang.php.streams.impl.InstantWriteStream;
 
 import com.caucho.quercus.QuercusContext;
@@ -133,7 +131,6 @@ public class PhpVerticleFactory implements VerticleFactory {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -159,8 +156,12 @@ public class PhpVerticleFactory implements VerticleFactory {
                 } catch (NullPointerException np) {
                     System.out.println(String.format("Could not find Vertx resource '%s''", resourceName));
                     np.printStackTrace();
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     e.printStackTrace();
+                }
+                catch (Exception err) {
+                    err.printStackTrace();
                 }
 
                 return NullValue.create();
@@ -210,7 +211,12 @@ public class PhpVerticleFactory implements VerticleFactory {
          */
         @Override
         public void start(Future<Void> var1) {
-
+//              context.exceptionHandler(throwable -> {
+//                  System.out.println("====== PhpVerticle exceptionHandler: " + throwable.getMessage());
+//                  System.out.println("globalEnv.getExceptionHandler() " + globalEnv.getExceptionHandler().toString() + " "  + globalEnv.getExceptionHandler().getCallbackName());
+////                  globalEnv.getExceptionHandler().call(globalEnv, globalEnv.wrapJava(throwable, globalEnv.getJavaClassDefinition(throwable.getClass())));
+//                  globalEnv.getExceptionHandler().call(globalEnv, globalEnv.wrapJava(new QuercusRuntimeException(throwable)));
+//              });
 //            vertx.createHttpServer().requestHandler(new Handler<HttpServerRequest>() {
 //                @Override
 //                public void handle(HttpServerRequest httpServerRequest) {
@@ -229,27 +235,35 @@ public class PhpVerticleFactory implements VerticleFactory {
             String script = String.format("<?php require '%s'; ?>", this.scriptName);
 
             try (ReadStream reader = (new StringPath(script)).openRead()) {
-                QuercusProgram program = QuercusParser.parse(querContext, null, reader);
-                QuercusPage page = new InterpretedPage(program);
+                try {
+                    QuercusProgram program = QuercusParser.parse(querContext, null, reader);
+                    QuercusPage page = new InterpretedPage(program);
 
-                out = new InstantWriteStream(StdoutStream.create());
-                globalEnv = new Env(querContext, page, out, null, null);
+                    out = new InstantWriteStream(StdoutStream.create());
+                    globalEnv = new Env(querContext, page, out, null, null);
 
-                AbstractFunction abstFunc = new AbstFunc(this.vertx);
-                globalEnv.addFunction("getVertx", abstFunc);
+                    AbstractFunction abstFunc = new AbstFunc(this.vertx);
+                    globalEnv.addFunction("getVertx", abstFunc);
 
-                AbstractFunction vertFunc = new VerticleFunc(this);
-                globalEnv.addFunction("verticle", vertFunc);
+                    AbstractFunction vertFunc = new VerticleFunc(this);
+                    globalEnv.addFunction("verticle", vertFunc);
 
-                globalEnv.start();
+                    AbstractFunction contextExceptionFunc = new ContextExceptionFunc(this.context);
+                    globalEnv.addFunction("contextException", contextExceptionFunc);
 
-                program.execute(globalEnv);
-                out.flush();
-                var1.complete();
+                    globalEnv.start();
+
+                    program.execute(globalEnv);
+                    out.flush();
+                    var1.complete();
+                } catch (Exception e) {
+                    System.out.println("Exception caught when parsed this php file");
+                    var1.fail(e);
+                }
             } catch (IOException e) {
                 var1.fail(new VertxException("Cannot parse PHP verticle: " + this.scriptName));
             } catch (Exception e) {
-                var1.fail(new VertxException(e));
+                var1.fail(e);
             }
 
         }
@@ -263,7 +277,7 @@ public class PhpVerticleFactory implements VerticleFactory {
                     out.close();
                     var1.complete();
                 } catch (IOException e) {
-                    var1.fail(new VertxException(e));
+                    var1.fail(e);
                 }
                 out = null;
             }
