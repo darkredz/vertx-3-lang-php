@@ -15,6 +15,7 @@
  */
 package io.vertx.lang.php.streams;
 
+import com.caucho.quercus.program.Arg;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 
@@ -58,6 +59,7 @@ public class Pump {
   private final Value drainHandlerValue = new Callback() {
     private static final long serialVersionUID = 1L;
 
+
     @Override
     public Value call(Env arg0, Value arg1) {
       drainHandler.handle(null);
@@ -88,6 +90,36 @@ public class Pump {
     @Override
     public boolean isCallable(Env env, boolean a, Value b) {
       return true;
+    }
+
+    @Override
+    public String getDeclFileName(Env env) {
+      return null;
+    }
+
+    @Override
+    public int getDeclStartLine(Env env) {
+      return 0;
+    }
+
+    @Override
+    public int getDeclEndLine(Env env) {
+      return 0;
+    }
+
+    @Override
+    public String getDeclComment(Env env) {
+      return null;
+    }
+
+    @Override
+    public boolean isReturnsReference(Env env) {
+      return false;
+    }
+
+    @Override
+    public Arg[] getArgs(Env env) {
+      return new Arg[0];
     }
   };
 
@@ -131,6 +163,36 @@ public class Pump {
     @Override
     public boolean isValid(Env arg0) {
       return true;
+    }
+
+    @Override
+    public String getDeclFileName(Env env) {
+      return null;
+    }
+
+    @Override
+    public int getDeclStartLine(Env env) {
+      return 0;
+    }
+
+    @Override
+    public int getDeclEndLine(Env env) {
+      return 0;
+    }
+
+    @Override
+    public String getDeclComment(Env env) {
+      return null;
+    }
+
+    @Override
+    public boolean isReturnsReference(Env env) {
+      return false;
+    }
+
+    @Override
+    public Arg[] getArgs(Env env) {
+      return new Arg[0];
     }
 
     @Override

@@ -237,28 +237,28 @@ public class Buffer implements ArrayAccess, Countable, Gettable {
   }
 
   @Override
-  public boolean offsetExists(Value pos) {
+  public boolean offsetExists(Env env, Value pos) {
     return buffer.length() > pos.toInt();
   }
 
   @Override
-  public Value offsetGet(Value pos) {
+  public Value offsetGet(Env env, Value pos) {
     return get(Env.getCurrent(), pos);
   }
 
   @Override
-  public Value offsetSet(Value pos, Value value) {
+  public Value offsetSet(Env env, Value pos, Value value) {
     set(Env.getCurrent(), pos, value);
     return null;
   }
 
   @Override
-  public Value offsetUnset(Value pos) {
+  public Value offsetUnset(Env env, Value pos) {
     return null;
   }
 
   @Override
-  public int count() {
+  public int count(Env env) {
     return buffer.length();
   }
 
